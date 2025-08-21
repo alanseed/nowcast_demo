@@ -4,10 +4,8 @@ import json
 import copy 
 from pathlib import Path
 import xarray as xr 
-import pysteps 
-
-from pysteps.utils.transformer import DBTransformer  
-
+from pysteps.cascade.bandpass_filters import filter_gaussian
+from utils.transformer import DBTransformer  
 from utils.nc_utils import read_qpe_netcdf
 
 def file_exists(file_path: Path) -> bool:
@@ -82,6 +80,7 @@ def main():
 
     threshold = config.get("precip_threshold",1) 
     transformer = DBTransformer(threshold)  
+    bp_filter = filter_gaussian()
 
 
 if __name__ == "__main__":
