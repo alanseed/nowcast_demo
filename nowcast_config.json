@@ -1,0 +1,45 @@
+{
+  "products": [
+    {
+      "product": "qpe",
+      "domain": "akl_rad",
+      "description": "1km radar domain",
+      "out_name_template": "$D_$P_$V{%Y-%m-%dT%H:%M:%S}.nc"
+    },
+    {
+      "product": "nowcast",
+      "domain": "akl_rad",
+      "description": "Steps parametric nowcast",
+      "rad_product": "qpe",
+      "out_name_template": "$D_$P_$V{%Y-%m-%dT%H:%M:%S}_$B{%Y-%m-%dT%H:%M:%S}.nc",
+      "n_cascade_levels": 8,
+      "timestep": 600,
+      "precip_threshold": 1.0,
+      "scale_break": 20,
+      "ar_order": 2,
+      "n_ens_members": 25,
+      "n_forecasts": 12,
+      "ht": 0.96, 
+      "alpha":2.83
+    }
+  ],
+  "domains": [
+    {
+      "name": "akl_rad",
+      "n_rows": 256,
+      "n_cols": 256,
+      "p_size": 1000,
+      "start_x": 1627000,
+      "start_y": 5854000,
+      "projection": {
+        "epsg": "EPSG:2193",
+        "name": "transverse_mercator",
+        "central_meridian": 173.0,
+        "latitude_of_origin": 0.0,
+        "scale_factor": 0.9996,
+        "false_easting": 1600000.0,
+        "false_northing": 10000000.0
+      }
+    }
+  ]
+}
