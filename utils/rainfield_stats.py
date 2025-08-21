@@ -2,7 +2,7 @@
 """
     Functions to calculate rainfield statistics
 """
-from typing import Optional, Tuple, Dict, Union, List, Callable, Any
+from typing import Optional, Tuple, Dict, List, Any
 import datetime
 from dataclasses import dataclass
 import xarray as xr

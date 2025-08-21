@@ -40,6 +40,12 @@ class StepsParameters:
             return value if value is not None else default
         else:
             return getattr(self, key, default)
+        
+    def set_metadata(self, key: str, value):
+        """Set a metadata key/value pair and validate if required."""
+        self.metadata[key] = value
+        if key in self._required_metadata_keys and value is None:
+            raise ValueError(f"Required metadata key '{key}' cannot be None.")
 
     def validate(self):
         """Raise ValueError if any required field is missing or None."""

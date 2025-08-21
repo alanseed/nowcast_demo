@@ -1,41 +1,23 @@
 from collections.abc import Callable
-from statsmodels.tsa.api import SimpleExpSmoothing
+
 import datetime
 import copy
 import logging
 import numpy as np
 import pandas as pd
+
+from statsmodels.tsa.api import SimpleExpSmoothing
+
 from pysteps.cascade.decomposition import decomposition_fft, recompose_fft
 from pysteps.timeseries.autoregression import adjust_lag2_corrcoef2,estimate_ar_params_yw
-from pysteps.utils import DBTransformer
 from pysteps import extrapolation
-from rainfields_db import get_db
-from models.db_utils import get_config
-from models.steps_params import StepsParameters
-from models.stochastic_generator import gen_stoch_field, normalize_db_field
-from models.rainfield_stats import correlation_length
-from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 
-
-def initialize_config(base_time_str, product, name):
-    try:
-        base_time = datetime.datetime.fromisoformat(
-            base_time_str).replace(tzinfo=datetime.timezone.utc)
-    except ValueError:
-        raise ValueError(f"Invalid base time format: {base_time_str}")
-
-    db = get_db()
-    config, domain = get_config(db, product, name)
-
-    return db, config, domain, base_time
-
-
-def prepare_forecast_loop(db, config, base_time, name, product):
-    print(f"Running {product} for domain {name} at {base_time}")
-    # Placeholder for forecast generation logic
-    # This is where you'd insert the time loop, forecast logic, and output handling
-    pass
-
+from utils.transformer import DBTransformer
+from utils.steps_params import StepsParameters
+from utils.stochastic_generator import gen_stoch_field, normalize_db_field
+from utils.rainfield_stats import correlation_length
+from utils.rainfield_stats import power_spectrum_1D
+from utils.cascade_utils import lagr_auto_cor
 
 def update_field(
     cascades: list,
@@ -530,3 +512,47 @@ def calc_corls(scales, czero, ht):
         corl = czero * (scale/lzero)**ht
         corls.append(corl)
     return corls
+
+def calculate_parameters(db_field: np.ndarray, cascades: dict, oflow: np.ndarray, scale_break: float, zero_value: float, dt:int):
+    p_dict = {}
+
+    # Probability distribution moments
+    nonzero_mask = db_field > zero_value
+    p_dict["nonzero_mean_db"] = np.mean(db_field[nonzero_mask]) if np.any(
+        nonzero_mask) else np.nan
+    p_dict["nonzero_stdev_db"] = np.std(db_field[nonzero_mask]) if np.any(
+        nonzero_mask) else np.nan
+    p_dict["rain_fraction"] = np.sum(nonzero_mask) / db_field.size
+
+    # Power spectrum slopes
+    _, ps_model = power_spectrum_1D(db_field, scale_break)
+    if ps_model:
+        p_dict["beta_1"] = ps_model.get("beta_1", -2.05)
+        p_dict["beta_2"] = ps_model.get("beta_2", -3.2)
+    else:
+        p_dict["beta_1"] = -2.05
+        p_dict["beta_2"] = -3.2
+
+    # Stack the (k,m,n) arrays in order t-2, t-1, t0 to get (t,k,m,n) array
+    data = []
+    for ia in range(3):
+        data.append(cascades[ia]["cascade_levels"])
+    data = np.stack(data)
+    a_corls = lagr_auto_cor(data, oflow)
+    n_levels = a_corls.shape[0]
+    lag_1 = []
+    lag_2 = []
+    clens = [] 
+    for ilag in range(n_levels): 
+        r1 = float(a_corls[ilag][0])
+        r2 = float(a_corls[ilag][1]) 
+        clen = correlation_length(r1,r2,dt)
+        lag_1.append(r1)
+        lag_2.append(r2) 
+        clens.append(clen) 
+
+    p_dict["lag_1"] = lag_1
+    p_dict["lag_2"] = lag_2
+    p_dict["corl_zero"] = clens[0]
+
+    return StepsParameters.from_dict(p_dict)

@@ -17,8 +17,7 @@ from .stochastic_generator import (
 )
 from .cascade_utils import (
     calculate_wavelengths,
-    lagr_auto_cor, 
-    make_states_df
+    lagr_auto_cor 
 )
 from .shared_utils import (
     qc_params,
@@ -27,7 +26,8 @@ from .shared_utils import (
     zero_state,
     is_zero_state,
     calc_corls,
-    fit_auto_cors
+    fit_auto_cors,
+    calculate_parameters
 )
 from .nc_utils import (
     generate_geo_dict,
