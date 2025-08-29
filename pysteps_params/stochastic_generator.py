@@ -2,7 +2,7 @@
 from typing import Optional
 import numpy as np
 from scipy import interpolate, stats
-from utils.steps_params import StepsParameters
+from steps_params import StepsParameters
 
 def gen_stoch_field(steps_params: StepsParameters, nx: int, ny: int, pixel_size:float, scale_break:float, threshold:float):
     """

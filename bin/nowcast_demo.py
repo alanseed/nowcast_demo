@@ -8,11 +8,11 @@ from pathlib import Path
 from pysteps.cascade.bandpass_filters import filter_gaussian
 from pysteps.motion import get_method as get_oflow_method
 from pysteps.cascade.decomposition import decomposition_fft
+from pysteps.utils.transformer import DBTransformer 
 
-from utils.transformer import DBTransformer
-from utils.nc_utils import read_qpe_netcdf
-from utils.steps_params import StepsParameters
-from utils.shared_utils import calculate_parameters
+from pysteps.param.nc_utils import read_qpe_netcdf
+from pysteps.param.steps_params import StepsParameters
+from pysteps.param.shared_utils import calculate_parameters
 
 def file_exists(file_path: Path) -> bool:
     """Check if the given file path exists."""
@@ -69,11 +69,11 @@ def main():
         print(f"Invalid configuration {e}")
         exit()
 
-    # Read in the netCDF file as xr dataset
-    filename = "data/akl_rad_qpe_20230127.nc"
-    data = read_qpe_netcdf(filename)
+    # Read in the netCDF file as xr dataset 
+    file_path = "/home/alanseed/alan/nowcast_demo/data/akl_rad_qpe_20230127.nc"
+    data = read_qpe_netcdf(file_path)
     if data is None:
-        print(f"Error reading {filename}")
+        print(f"Error reading {file_path}")
         exit()
 
     # Set up the base_time for the nowcast
