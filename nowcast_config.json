@@ -12,11 +12,12 @@
       "description": "Steps parametric nowcast",
       "rad_product": "qpe",
       "out_name_template": "$D_$P_$V{%Y-%m-%dT%H:%M:%S}_$B{%Y-%m-%dT%H:%M:%S}.nc",
+      "ar_order":2,
       "n_cascade_levels": 8,
       "timestep": 600,
       "precip_threshold": 1.0,
       "scale_break": 20000,
-      "n_ens_members": 25,
+      "n_ensembles": 25,
       "n_forecasts": 12,
       "ht": 0.96, 
       "alpha":2.83
